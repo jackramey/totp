@@ -75,7 +75,7 @@ func hash(k, c []byte) []byte {
 }
 
 // dt performs the dynamic truncation defined in [RFC-4226 Section 5.3](https://datatracker.ietf.org/doc/html/rfc4226#section-5.3)
-// and modulos the result value with 10^{d} to return a uint32 value with d number of digits
+// and perfoms a modulo on the result value with 10^{d} to return a uint32 value with d number of digits
 func dt(b []byte, d uint32) uint32 {
 	offset := b[len(b)-1] & 0x0F // Offset bits are the 4 least significant bits of the hash
 	// AND with 0x7FFFFFFF clears out the most significant bit to avoid confusion around signed vs unsigned modulo computations
