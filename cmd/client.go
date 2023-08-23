@@ -16,9 +16,6 @@ func main() {
 		totpCode, secondsRemaining := totp.Generate(secret, 0, 30, 6, nil)
 		fmt.Printf("Current TOTP code: %d  Time remaining: %d\n", totpCode, secondsRemaining)
 
-		totpCode, secondsRemaining = g.Generate(secret)
-		fmt.Printf("Current TOTP code: %d  Time remaining: %d\n", totpCode, secondsRemaining)
-
 		time.Sleep(1 * time.Second)
 	}
 }
