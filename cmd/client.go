@@ -8,9 +8,7 @@ import (
 )
 
 func main() {
-	secret := "I75NTBBDHWDSX67T"
-
-	g := totp.NewGenerator(totp.WithD(8))
+	secret := "I75NTBBDHWDSX67T" // NOTE: this is not a real secret
 
 	for i := 0; i < 100; i++ {
 		totpCode, secondsRemaining := totp.Generate(secret, 0, 30, 6, nil)
