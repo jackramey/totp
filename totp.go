@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"time"
 )
 
 // Generate a TOTP value and the number of seconds remaining that the code is valid for
@@ -20,7 +19,7 @@ import (
 func Generate(secret string, t0, x int64, d uint32, currentTimeFn func() int64) (code uint32, timeRemaining uint64, err error) {
 	secretBytes, err := decodeSecret(secret)
 	if err != nil {
-		panic(err)
+		return 0, 0, err
 	}
 
 	tFunc := tFn[uint64](t0, x, currentTimeFn)
@@ -40,7 +39,7 @@ func Generate(secret string, t0, x int64, d uint32, currentTimeFn func() int64) 
 func tFn[T int64 | uint64](t0, x int64, currentTimeFn func() int64) func() (T, T) {
 	return func() (T, T) {
 		if currentTimeFn == nil {
-			currentTimeFn = time.Now().UTC().Unix
+			currentTimeFn = clk.Now().UTC().Unix
 		}
 		if x == 0 {
 			x = 30

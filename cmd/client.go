@@ -13,7 +13,10 @@ func main() {
 	g := totp.NewGenerator()
 
 	for i := 0; i < 100; i++ {
-		totpCode, secondsRemaining := g.Generate(secret)
+		totpCode, secondsRemaining, err := g.Generate(secret)
+		if err != nil {
+			panic(err)
+		}
 		fmt.Printf("Current TOTP code: %d  Time remaining: %d\n", totpCode, secondsRemaining)
 
 		time.Sleep(1 * time.Second)

@@ -1,7 +1,9 @@
 package totp
 
 import (
+	"reflect"
 	"testing"
+	"time"
 )
 
 func TestGenerate(t *testing.T) {
@@ -74,7 +76,34 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
-func TestTFn_int64(t *testing.T) {
+func TestGenerate_Errors(t *testing.T) {
+	tests := []struct {
+		name          string
+		secret        string
+		t0            int64
+		x             int64
+		d             uint32
+		currentTimeFn func() int64
+		wantErr       bool
+	}{
+		{
+			name:    "Invalid Base32 characters in secret results in an error",
+			secret:  "1ISNOTANALLOWEDCHARACTER",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, _, err := Generate(tt.secret, tt.t0, tt.x, tt.d, tt.currentTimeFn)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Generate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
+func Test_tFn_int64(t *testing.T) {
 	type testCase[T interface{ int64 | uint64 }] struct {
 		name          string
 		t0            int64
@@ -113,7 +142,7 @@ func TestTFn_int64(t *testing.T) {
 	}
 }
 
-func TestTFn_uint64(t *testing.T) {
+func Test_tFn_uint64(t *testing.T) {
 	type testCase[T interface{ int64 | uint64 }] struct {
 		name          string
 		t0            int64
@@ -150,4 +179,55 @@ func TestTFn_uint64(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_tFn_defaults(t *testing.T) {
+	clk = fakeClock{
+		nowFn: func() time.Time {
+			return time.Unix(123, 0)
+		},
+	}
+	type testCase[T interface{ int64 | uint64 }] struct {
+		name          string
+		t0            int64
+		x             int64
+		currentTimeFn func() int64
+		wantT         T
+		wantR         T
+	}
+	tests := []testCase[uint64]{
+		{
+			name:          "nil clock provided results in default clock being used",
+			x:             20,
+			currentTimeFn: nil,
+			wantT:         6,
+			wantR:         17,
+		},
+		{
+			name:          "x = 0 provided results in default x value being used",
+			x:             0,
+			currentTimeFn: func() int64 { return 60 },
+			wantT:         2,
+			wantR:         30,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotT, gotR := tFn[uint64](tt.t0, tt.x, tt.currentTimeFn)()
+			if !reflect.DeepEqual(gotT, tt.wantT) {
+				t.Errorf("T = %v, want %v", gotT, tt.wantT)
+			}
+			if !reflect.DeepEqual(gotR, tt.wantR) {
+				t.Errorf("R = %v, want %v", gotR, tt.wantR)
+			}
+		})
+	}
+}
+
+type fakeClock struct {
+	nowFn func() time.Time
+}
+
+func (f fakeClock) Now() time.Time {
+	return f.nowFn()
 }

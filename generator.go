@@ -1,7 +1,5 @@
 package totp
 
-import "time"
-
 // Generator is a type that simplifies generation of TOTP codes by allowing configuration to be saved
 // to the generator object.
 type Generator struct {
@@ -58,7 +56,7 @@ func NewGenerator(opts ...Option) *Generator {
 		t0:            defaultT0,
 		x:             defaultX,
 		d:             defaultD,
-		currentTimeFn: func() int64 { return time.Now().UTC().Unix() },
+		currentTimeFn: func() int64 { return clk.Now().UTC().Unix() },
 	}
 
 	for _, opt := range opts {
