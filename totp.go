@@ -12,7 +12,12 @@ import (
 	"time"
 )
 
-func Generate(secret string, t0, x int64, d uint32, currentTimeFn func() int64) (uint32, uint64) {
+// Generate a TOTP value and the number of seconds remaining that the code is valid for
+// t0 is the Unix time to start counting time steps (default value is 0, i.e., the Unix epoch) and is also a system parameter
+// x represents the time step size in seconds (default value x = 30 seconds) and is a system parameter
+// d represents the number of digits the TOTP code will be
+// currentTimeFn is a function that should return the current unix time from the UTC time zone
+func Generate(secret string, t0, x int64, d uint32, currentTimeFn func() int64) (code uint32, timeRemaining uint64, err error) {
 	secretBytes, err := decodeSecret(secret)
 	if err != nil {
 		panic(err)
@@ -23,14 +28,14 @@ func Generate(secret string, t0, x int64, d uint32, currentTimeFn func() int64) 
 	t, r := tFunc()
 	binary.BigEndian.PutUint64(timeBytes, t)
 
-	return hotp(secretBytes, timeBytes, d), r
+	return hotp(secretBytes, timeBytes, d), r, err
 }
 
 // tFn takes a time function as an input, and returns a function that provides the T and R values where T is the number
-// of time steps between the initial counter time T0 and the current time and R is the number of seconds remaining until
+// of time steps between the initial counter time t0 and the current time and R is the number of seconds remaining until
 // the next code is produced.
 // t0 is the Unix time to start counting time steps (default value is 0, i.e., the Unix epoch) and is also a system parameter
-// x represents the time step in seconds (default value X = 30 seconds) and is a system parameter
+// x represents the time step size in seconds (default value x = 30 seconds) and is a system parameter
 // If currentTimeFn is nil it will default to time.Now().UTC().Unix
 func tFn[T int64 | uint64](t0, x int64, currentTimeFn func() int64) func() (T, T) {
 	return func() (T, T) {
@@ -75,7 +80,7 @@ func hash(k, c []byte) []byte {
 }
 
 // dt performs the dynamic truncation defined in [RFC-4226 Section 5.3](https://datatracker.ietf.org/doc/html/rfc4226#section-5.3)
-// and perfoms a modulo on the result value with 10^{d} to return a uint32 value with d number of digits
+// and performs a modulo on the result value with 10^{d} to return a uint32 value with d number of digits
 func dt(b []byte, d uint32) uint32 {
 	offset := b[len(b)-1] & 0x0F // Offset bits are the 4 least significant bits of the hash
 	// AND with 0x7FFFFFFF clears out the most significant bit to avoid confusion around signed vs unsigned modulo computations

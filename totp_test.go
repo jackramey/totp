@@ -4,6 +4,76 @@ import (
 	"testing"
 )
 
+func TestGenerate(t *testing.T) {
+	tests := []struct {
+		name              string
+		secret            string
+		t0                int64
+		x                 int64
+		d                 uint32
+		currentTimeFn     func() int64
+		wantCode          uint32
+		wantTimeRemaining uint64
+		wantErr           bool
+	}{
+		{
+			name:              "Generate a code with 6 digits",
+			secret:            "ITSASECRETSHHHHH",
+			t0:                0,
+			x:                 30,
+			d:                 6,
+			currentTimeFn:     func() int64 { return 59 },
+			wantCode:          467194,
+			wantTimeRemaining: 1,
+		},
+		{
+			name:              "Generate a code with 4 digits",
+			secret:            "ITSASECRETSHHHHH",
+			t0:                0,
+			x:                 30,
+			d:                 4,
+			currentTimeFn:     func() int64 { return 59 },
+			wantCode:          7194,
+			wantTimeRemaining: 1,
+		},
+		{
+			name:              "Lowercase secrets shouldn't affect the code",
+			secret:            "itsasecretshhhhh",
+			t0:                0,
+			x:                 30,
+			d:                 6,
+			currentTimeFn:     func() int64 { return 59 },
+			wantCode:          467194,
+			wantTimeRemaining: 1,
+		},
+		{
+			name:              "Next step should produce a different code and more time remaining",
+			secret:            "ITSASECRETSHHHHH",
+			t0:                0,
+			x:                 30,
+			d:                 6,
+			currentTimeFn:     func() int64 { return 60 },
+			wantCode:          858003,
+			wantTimeRemaining: 30,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCode, gotTimeRemaining, err := Generate(tt.secret, tt.t0, tt.x, tt.d, tt.currentTimeFn)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Generate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotCode != tt.wantCode {
+				t.Errorf("Generate() gotCode = %v, want %v", gotCode, tt.wantCode)
+			}
+			if gotTimeRemaining != tt.wantTimeRemaining {
+				t.Errorf("Generate() gotTimeRemaining = %v, want %v", gotTimeRemaining, tt.wantTimeRemaining)
+			}
+		})
+	}
+}
+
 func TestTFn_int64(t *testing.T) {
 	type testCase[T interface{ int64 | uint64 }] struct {
 		name          string
