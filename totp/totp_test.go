@@ -182,7 +182,7 @@ func Test_tFn_uint64(t *testing.T) {
 }
 
 func Test_tFn_defaults(t *testing.T) {
-	clk = fakeClock{
+	Clock = fakeClock{
 		nowFn: func() time.Time {
 			return time.Unix(123, 0)
 		},
@@ -197,7 +197,7 @@ func Test_tFn_defaults(t *testing.T) {
 	}
 	tests := []testCase[uint64]{
 		{
-			name:          "nil clock provided results in default clock being used",
+			name:          "nil Clock provided results in default Clock being used",
 			x:             20,
 			currentTimeFn: nil,
 			wantT:         6,

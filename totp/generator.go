@@ -56,7 +56,7 @@ func NewGenerator(opts ...Option) *Generator {
 		t0:            defaultT0,
 		x:             defaultX,
 		d:             defaultD,
-		currentTimeFn: func() int64 { return clk.Now().UTC().Unix() },
+		currentTimeFn: func() int64 { return Clock.Now().UTC().Unix() },
 	}
 
 	for _, opt := range opts {

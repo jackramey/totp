@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackramey/totp"
+	"github.com/jackramey/totp/totp"
 )
 
 func main() {
-	secret := "I75NTBBDHWDSX67T" // NOTE: this is not a real secret
+	secret := "FIQAUAK4DIDGHEN5FTT7Q7BW3GMUDWMM" // NOTE: this is not a real secret
 
 	g := totp.NewGenerator()
 

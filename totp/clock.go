@@ -2,7 +2,7 @@ package totp
 
 import "time"
 
-var clk clock = stdClock{}
+var Clock clock = stdClock{}
 
 type clock interface {
 	Now() time.Time

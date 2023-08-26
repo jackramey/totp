@@ -39,7 +39,7 @@ func Generate(secret string, t0, x int64, d uint32, currentTimeFn func() int64) 
 func tFn[T int64 | uint64](t0, x int64, currentTimeFn func() int64) func() (T, T) {
 	return func() (T, T) {
 		if currentTimeFn == nil {
-			currentTimeFn = clk.Now().UTC().Unix
+			currentTimeFn = Clock.Now().UTC().Unix
 		}
 		if x == 0 {
 			x = 30
